@@ -2,14 +2,16 @@
 """Analyse Racoon GPS logger data
 
     USAGE:
-        python racoon-analyse-gps.py <INFILE.(gpx|txt)>
+        python racoon-analyse-gps.py [<INFILE.(gpx|txt)>]
 
     Example Output generated from example.gpx (converted from example.kml) can
     be viewed in *example.gpx.html* and *example.gpx.html.png*
 
     HOW TO USE
     ==========
-    1. Run the command above.
+    1. Run the command above
+       OR
+       When run without arguments a file chooser dialog will appear.
     2. A browser with an OpenStreetMap should appear.
 
     The program shows the gps positions in two different colors:
@@ -28,7 +30,7 @@
 
       NOTE!!!: If you use pipenv the run command changes to:
 
-        `pipenv run python racoon-analyse-gps.py <GPXFILENAME>`
+        `pipenv run python racoon-analyse-gps.py <INFILE.(gpx|txt)>`
          ~~~~~~~~~~
 
     - If you are not using Pipenv you have to make sure all dependencies are
@@ -37,8 +39,15 @@
       These are probably installed with pip with:
       `pip install --user pandas gpxpy mplleaflet matplotlib`
 
+      WINDOWS
+      -------
+      - Install python3 https://www.python.org/downloads/
+      - Make sure to tick "Add python to PATH" during the installation
+      - Open Terminal and run `pip3.exe install pandas gpxpy mplleaflet matplotlib`
+
     CHANGELOG
     =========
+    0.2.0 Added simple 'GUI' to choose the gps file
     0.1.1 Added txt gps importer
     0.1.0 Inital with gpx file importer
 
@@ -53,12 +62,13 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-
-import pandas as pd  # BSD License
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 
 import gpxpy  # Apache-2.0
 import matplotlib.pyplot as plt  # BSD like matplotlib License
 import mplleaflet  # BSD 3-Clause License
+import pandas as pd  # BSD License
 from dateutil.parser import parse  # Apache-2.0
 
 
@@ -122,11 +132,13 @@ def main(in_filename):
 if __name__ == '__main__':
     print('racoon-analyse-gps {}'.format(__version__))
     if len(sys.argv) < 2:
-        print('Error: GPX file is missing!')
-        print("""USAGE:
-            python racoon-analyse-gps.py <GPXFILENAME>
+        Tk().withdraw()
+        filename = askopenfilename(initialdir=os.path.expanduser('~'),
+                                   title="Select GPS file",
+                                   filetypes=(
+                                       ("gps files", "*.gpx"),
+                                       ("gps files", "*.txt")))
+    else:
+        filename = sys.argv[1]
 
-    Also see source file for more information.""")
-        sys.exit(1)
-
-    main(in_filename=sys.argv[1])
+    main(in_filename=filename)
